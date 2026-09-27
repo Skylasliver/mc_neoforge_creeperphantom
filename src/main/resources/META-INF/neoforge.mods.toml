@@ -1,0 +1,45 @@
+# 模组使用的语言加载器。 / Language loader used by the mod.
+modLoader="javafml"
+# 语言加载器兼容版本范围。 / Compatible language loader version range.
+loaderVersion="[4,)"
+# 模组许可证标识。 / Mod license identifier.
+license="MIT"
+
+# 模组元数据表。 / Mod metadata table.
+[[mods]]
+# 模组或依赖的唯一标识符，取决于所在表。 / Unique identifier of the mod or dependency, depending on the table.
+modId="skylasliver_creeperphantom"
+# 由构建流程替换为 Gradle 项目版本。 / Replaced with the Gradle project version during the build.
+version="${version}"
+# 游戏中显示的模组名称。 / Mod name displayed in game.
+displayName="Creeper Phantom"
+# 模组作者。 / Mod author.
+authors="skylasliver"
+# 模组功能描述。 / Description of the mod's functionality.
+description="Adds the hostile Creeper Phantom that replaces some naturally spawned phantoms."
+
+# 依赖声明表。 / Dependency declaration table.
+[[dependencies.skylasliver_creeperphantom]]
+# 模组或依赖的唯一标识符，取决于所在表。 / Unique identifier of the mod or dependency, depending on the table.
+modId="neoforge"
+# 依赖类型；required 表示运行必需。 / Dependency type; required means mandatory at runtime.
+type="required"
+# 依赖兼容版本范围；方括号包含端点，圆括号不包含。 / Compatible dependency version range; square brackets include endpoints and parentheses exclude them.
+versionRange="[21.1.252,)"
+# 依赖加载顺序；NONE 表示不额外指定顺序。 / Dependency load order; NONE adds no ordering requirement.
+ordering="NONE"
+# 依赖适用端；BOTH 表示客户端和服务端。 / Applicable dependency side; BOTH means client and server.
+side="BOTH"
+
+# 依赖声明表。 / Dependency declaration table.
+[[dependencies.skylasliver_creeperphantom]]
+# 模组或依赖的唯一标识符，取决于所在表。 / Unique identifier of the mod or dependency, depending on the table.
+modId="minecraft"
+# 依赖类型；required 表示运行必需。 / Dependency type; required means mandatory at runtime.
+type="required"
+# 依赖兼容版本范围；方括号包含端点，圆括号不包含。 / Compatible dependency version range; square brackets include endpoints and parentheses exclude them.
+versionRange="[1.21.1]"
+# 依赖加载顺序；NONE 表示不额外指定顺序。 / Dependency load order; NONE adds no ordering requirement.
+ordering="NONE"
+# 依赖适用端；BOTH 表示客户端和服务端。 / Applicable dependency side; BOTH means client and server.
+side="BOTH"
