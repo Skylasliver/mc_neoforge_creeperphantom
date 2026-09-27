@@ -8,7 +8,8 @@ Minecraft 1.21.1 / NeoForge 21.1.252
 ## 配置
 
 运行时配置位于游戏实例的 `config/creeper-phantom.json`，包含中文注释。
-管理员执行 `/creeperphantom reload` 重载；仅影响新生成实体。非法配置不会替换上一份有效设置。
+
+管理员执行 `/creeperphantom reload` 重载；仅影响新生成实体。
 
 ## 许可证
 MIT，见 LICENSE。
