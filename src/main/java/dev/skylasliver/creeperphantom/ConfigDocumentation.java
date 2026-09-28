@@ -1,13 +1,20 @@
 package dev.skylasliver.creeperphantom;
 
 import java.util.Map;
-import java.util.regex.Pattern;
 
-/** Adds Chinese documentation without changing values or discarding user comments. */
-final class ConfigDocumentation {
-    private static final String MARKER = "// 苦力怕幻翼配置说明（内联注释 v1）";
-    private static final Pattern FIELD = Pattern.compile("^(\\s*)\"([^\"]+)\"\\s*:");
+/** Field descriptions used by the unified TOML writer. */
+public final class ConfigDocumentation {
     private static final Map<String, String> COMMENTS = Map.ofEntries(
+        Map.entry("thunderElytra", "雷霆鞘翅的锻造、飞行与修复设置。"),
+        Map.entry("thunderContinuance", "雷霆续行附魔的效果、引雷与加速设置。"),
+        Map.entry("creeperPhantom", "苦力怕幻翼和乘客设置；保存后仅影响新生成的实体。"),
+        Map.entry("craftingEnabled", "是否允许锻造雷霆鞘翅；关闭不影响已有物品。"),
+        Map.entry("flightSpeedMultiplier", "相对原版鞘翅的滑翔速度倍率，1–4。"),
+        Map.entry("lightningRepairEnabled", "被雷击中时是否修满雷霆鞘翅耐久。"),
+        Map.entry("enabled", "雷霆续行总开关；关闭会停止主动引雷、雷击加速并清除充能。"),
+        Map.entry("lightningBoostPercent", "雷击额外加速，0–200%；50 表示再乘以 1.5。"),
+        Map.entry("lightningBoostSeconds", "雷击加速持续时间，1–300 秒，整数。"),
+        Map.entry("lightningAttractionIntervalSeconds", "主动引雷间隔，1–3600 秒，整数。"),
         Map.entry("normalBurnsInDaylight", "普通苦力怕幻翼是否在白天受日照燃烧；true 开启，false 关闭。"),
         Map.entry("chargedBurnsInDaylight", "闪电苦力怕幻翼是否在白天受日照燃烧；true 开启，false 关闭。"),
         Map.entry("phantomReplacementChance", "夜间自然生成幻翼被替换的概率，0–100%。"),
@@ -42,39 +49,6 @@ final class ConfigDocumentation {
 
     private ConfigDocumentation() {}
 
-    static String annotate(String text) {
-        if (text.startsWith("\uFEFF")) text = text.substring(1);
-        var root = com.google.gson.JsonParser.parseString(text).getAsJsonObject();
-        StringBuilder missing = new StringBuilder();
-        for (String key : new String[]{"normalBurnsInDaylight", "chargedBurnsInDaylight"}) {
-            if (!root.has(key)) {
-                if (!missing.isEmpty()) missing.append(",\n");
-                missing.append("  // ").append(COMMENTS.get(key)).append('\n')
-                    .append("  \"").append(key).append("\": true");
-            }
-        }
-        if (!missing.isEmpty()) {
-            // Skip leading comments so braces inside user documentation are preserved.
-            var opening = Pattern.compile("\\A(?:\\s|//[^\\r\\n]*(?:\\R|$)|/\\*[\\s\\S]*?\\*/)*\\{").matcher(text);
-            if (!opening.find()) throw new IllegalArgumentException("Missing configuration object");
-            int offset = opening.end();
-            text = text.substring(0, offset) + "\n" + missing
-                + (root.size() > 0 ? ",\n" : "\n") + text.substring(offset);
-        }
-        if (text.startsWith(MARKER)) return text;
-        StringBuilder result = new StringBuilder(MARKER).append('\n')
-            .append("// 本文件是实际加载的配置；保留 .json 文件名，支持 // 和 /* */ 注释。\n")
-            .append("// 修改后执行 /creeperphantom reload（权限等级 2）；仅影响新生成实体。\n")
-            .append("// 百分数范围 0–100；武器、护甲套装、力量各组概率合计不得超过 100。\n")
-            .append("// 未知字段、错误类型、无效 ID 或越界数值会拒绝整份配置，继续使用上一份有效设置。\n");
-        for (String line : text.split("\\R", -1)) {
-            var match = FIELD.matcher(line);
-            if (match.find()) {
-                String comment = COMMENTS.get(match.group(2));
-                if (comment != null) result.append(match.group(1)).append("// ").append(comment).append('\n');
-            }
-            result.append(line).append('\n');
-        }
-        return result.toString();
-    }
+    public static String comment(String key) { return COMMENTS.getOrDefault(key, key); }
+
 }

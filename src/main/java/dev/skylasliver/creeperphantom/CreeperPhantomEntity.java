@@ -285,6 +285,7 @@ public class CreeperPhantomEntity extends Phantom {
     }
     @Override protected void dropCustomDeathLoot(ServerLevel level,DamageSource source,boolean hit) {
         super.dropCustomDeathLoot(level,source,hit);
+        if(isCharged())spawnAtLocation(CreeperPhantomMod.THUNDER_MEMBRANE.get());
         if(source.getEntity() instanceof AbstractSkeleton skeleton && riderSkeletons.contains(skeleton.getUUID()))
             BuiltInRegistries.ITEM.getTag(ItemTags.CREEPER_DROP_MUSIC_DISCS)
                 .flatMap(tag->tag.getRandomElement(random)).ifPresent(item->spawnAtLocation(item.value()));

@@ -158,25 +158,6 @@ public final class PhantomRegressionTests {
         h.succeed();
     }
 
-    @GameTest(template="empty", timeoutTicks=40)
-    public static void daylightConfigMigration(GameTestHelper h) {
-        for (String original : new String[]{
-            "/* { user comment } */\n{}",
-            "// 苦力怕幻翼配置说明（内联注释 v1）\n{\n\"flightSpeed\":1.25}",
-            "{\"normalBurnsInDaylight\":false}",
-            "{\"chargedBurnsInDaylight\":false}"
-        }) {
-            String upgraded = ConfigDocumentation.annotate(original);
-            var root = com.google.gson.JsonParser.parseString(upgraded).getAsJsonObject();
-            h.assertTrue(root.has("normalBurnsInDaylight") && root.has("chargedBurnsInDaylight"),
-                "Old config must expose both new switches");
-            h.assertTrue(upgraded.equals(ConfigDocumentation.annotate(upgraded)), "Upgrade must be idempotent");
-            h.assertTrue(PhantomConfig.GSON.toJsonTree(PhantomConfig.parse(original, h.getLevel().registryAccess()))
-                .equals(PhantomConfig.GSON.toJsonTree(PhantomConfig.parse(upgraded, h.getLevel().registryAccess()))),
-                "Upgrade must preserve existing values and defaults");
-        }
-        h.succeed();
-    }
 
     @GameTest(template="empty", timeoutTicks=60)
     public static void autonomousHighAltitudeAttack(GameTestHelper h) {
@@ -399,34 +380,7 @@ public final class PhantomRegressionTests {
         h.succeed();
     }
 
-    @GameTest(template="empty", timeoutTicks=40)
-    public static void documentedConfigRoundTrip(GameTestHelper h) {
-        var original = new PhantomConfig.Settings();
-        original.flightSpeed = 1.25;
-        original.skeleton.powerLevels.clear();
-        String json = PhantomConfig.GSON.toJson(original);
-        String documented = ConfigDocumentation.annotate(json);
-        h.assertTrue(documented.contains("// 最大生命值"), "Chinese comments must appear beside actual fields");
-        h.assertTrue(documented.equals(ConfigDocumentation.annotate(documented)), "Repeated loads must not duplicate comments");
-        var loaded = PhantomConfig.parse(documented, h.getLevel().registryAccess());
-        h.assertTrue(PhantomConfig.GSON.toJsonTree(original).equals(PhantomConfig.GSON.toJsonTree(loaded)),
-            "Inline documentation must preserve every setting and explicit empty list");
-        h.succeed();
-    }
 
-    @GameTest(template="empty", timeoutTicks=40)
-    public static void configPreservesUserComments(GameTestHelper h) {
-        String original = "\uFEFF/* 自定义说明 */\n{\n  // 保留这个数值\n  \"flightSpeed\": 1.25\n}";
-        String documented = ConfigDocumentation.annotate(original);
-        h.assertTrue(documented.contains("/* 自定义说明 */") && documented.contains("// 保留这个数值"),
-            "Automatic documentation must retain user comments");
-        var loaded = PhantomConfig.parse(documented, h.getLevel().registryAccess());
-        h.assertTrue(loaded.flightSpeed == 1.25 && loaded.maxHealth == 40,
-            "Commented partial configs must load their values and default missing fields");
-        h.assertTrue(PhantomConfig.parse("{\"flightSpeed\":1.25}", h.getLevel().registryAccess()).flightSpeed == 1.25,
-            "Existing compact plain JSON must remain compatible");
-        h.succeed();
-    }
 
     @GameTest(template="empty", timeoutTicks=40)
     public static void partialEquipmentRetainsDefaults(GameTestHelper h) {

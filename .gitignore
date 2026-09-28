@@ -5,3 +5,4 @@ run-*/
 logs/
 .idea/
 *.iml
+.modmind/

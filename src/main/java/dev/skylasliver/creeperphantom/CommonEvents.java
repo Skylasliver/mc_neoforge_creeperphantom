@@ -21,7 +21,12 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 public final class CommonEvents {
     public static final String FALL="creeper_phantom_safe_fall";
     @SubscribeEvent public void start(ServerAboutToStartEvent e) {
-        PhantomConfig.reload(e.getServer().registryAccess());
+        PhantomConfig.loadForServer(e.getServer().registryAccess());
+        com.mojang.logging.LogUtils.getLogger().info(
+            "模组配置路径：{}；雷霆续行 enabled={}，加速={}%，持续={} 秒，引雷间隔={} 秒",
+            UnifiedConfig.path().toAbsolutePath(), ThunderConfig.value(ThunderConfig.CONTINUANCE_ENABLED),
+            ThunderConfig.value(ThunderConfig.LIGHTNING_BOOST), ThunderConfig.value(ThunderConfig.BOOST_SECONDS),
+            ThunderConfig.value(ThunderConfig.ATTRACTION_SECONDS));
     }
     @SubscribeEvent public void commands(RegisterCommandsEvent e) {
         e.getDispatcher().register(Commands.literal("creeperphantom").requires(s->s.hasPermission(2))
@@ -44,7 +49,8 @@ public final class CommonEvents {
     }
     @SubscribeEvent public void lightning(EntityJoinLevelEvent e) {
         if(e.loadedFromDisk() || !(e.getLevel() instanceof ServerLevel level) || !level.isThundering()
-            || !(e.getEntity() instanceof LightningBolt bolt) || bolt.getCause()!=null)return;
+            || !(e.getEntity() instanceof LightningBolt bolt) || bolt.getCause()!=null
+            || bolt.getPersistentData().getBoolean(ThunderElytraEvents.ATTRACTED_BOLT))return;
         level.getEntitiesOfClass(CreeperPhantomEntity.class,bolt.getBoundingBox().inflate(128),
             p->!p.isCharged() && p.isAlive() && level.canSeeSky(p.blockPosition()))
             .stream().min(Comparator.comparingDouble(p->p.distanceToSqr(bolt)))

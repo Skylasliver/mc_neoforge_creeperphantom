@@ -1,3 +1,6 @@
+# Gradle Unix 脚本固定使用 LF 换行。 / Use LF line endings for the Gradle Unix script.
 gradlew text eol=lf
+# Windows 批处理脚本使用 CRLF 换行。 / Use CRLF line endings for Windows batch scripts.
 *.bat text eol=crlf
+# 将 JAR 视为二进制文件，不进行文本换行转换。 / Treat JAR files as binary without text line-ending conversion.
 *.jar binary

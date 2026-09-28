@@ -6,7 +6,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.loading.FMLPaths;
+
 import java.math.BigDecimal;
 import java.nio.file.*;
 import java.util.*;
@@ -22,7 +22,7 @@ public final class PhantomConfig {
         "enchantments", GSON.toJsonTree(new Enchant("minecraft:unbreaking", 1, 100)),
         "weaponEnchantments", GSON.toJsonTree(new Enchant("minecraft:unbreaking", 1, 100)));
     private static volatile Settings active = new Settings();
-    public static final String FILE_NAME = "creeper-phantom.json";
+
     private PhantomConfig() {}
 
     public static Settings snapshot() { return GSON.fromJson(GSON.toJsonTree(active), Settings.class); }
@@ -30,51 +30,35 @@ public final class PhantomConfig {
 
     public record ReloadResult(boolean success, String message) {}
 
+    static synchronized ReloadResult loadForServer(RegistryAccess registry) {
+        // Integrated servers share this JVM. A new world must never inherit the last world's fallback.
+        active = new Settings();
+        return reload(registry);
+    }
+
     public static synchronized ReloadResult reload(RegistryAccess registry) {
-        Path file = FMLPaths.CONFIGDIR.get().resolve(FILE_NAME);
         try {
-            if (!Files.exists(file)) {
-                Files.createDirectories(file.getParent());
-                Files.writeString(file, ConfigDocumentation.annotate(GSON.toJson(new Settings())));
-            }
-            String text = Files.readString(file);
-            Settings candidate = parse(text, registry);
-            // Validate first; a documentation write failure must not reject valid settings.
-            String documented = ConfigDocumentation.annotate(text);
-            if (!documented.equals(text)) {
-                try { writeDocumented(file, documented); }
-                catch (java.io.IOException e) {
-                    LogUtils.getLogger().warn("配置有效，但未能补充中文注释：{}", file, e);
-                }
-            }
+            Path file = UnifiedConfig.path();
+            Settings candidate = UnifiedConfig.parse(Files.readString(file), registry);
             active = candidate;
-            return new ReloadResult(true, "苦力怕幻翼配置已重载；仅影响新生成实体。");
+            return new ReloadResult(true, "苦力怕幻翼配置已从 " + file + " 重载；仅影响新生成实体。");
         } catch (Exception e) {
-            String message = "配置加载失败，继续使用上一份有效配置：" + e.getMessage();
+            String message = "配置加载失败（" + UnifiedConfig.path() + "），保留本服务器有效配置（首次加载失败时使用默认值）：" + e.getMessage();
             LogUtils.getLogger().error(message);
             return new ReloadResult(false, message);
         }
     }
 
-    private static void writeDocumented(Path file, String text) throws java.io.IOException {
-        Path temporary = Files.createTempFile(file.getParent(), "creeper-phantom-", ".tmp");
-        try {
-            Files.writeString(temporary, text);
-            try {
-                Files.move(temporary, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-            } catch (AtomicMoveNotSupportedException e) {
-                Files.move(temporary, file, StandardCopyOption.REPLACE_EXISTING);
-            }
-        } finally {
-            Files.deleteIfExists(temporary);
-        }
-    }
-
-    public static Settings parse(String text, RegistryAccess registry) {
+    // JSON remains the entity-save and legacy-import format.
+    static Settings parseStructure(String text) {
         JsonElement tree = JsonParser.parseString(text);
         if (!tree.isJsonObject()) throw new IllegalArgumentException("root: expected JSON object");
         rejectUnknown(tree, SCHEMA, "root");
-        Settings s = GSON.fromJson(withDefaults(tree.getAsJsonObject(), SCHEMA.getAsJsonObject()), Settings.class);
+        return GSON.fromJson(withDefaults(tree.getAsJsonObject(), SCHEMA.getAsJsonObject()), Settings.class);
+    }
+
+    public static Settings parse(String text, RegistryAccess registry) {
+        Settings s = parseStructure(text);
         validate(s, registry);
         return s;
     }
@@ -194,7 +178,7 @@ public final class PhantomConfig {
     public static final class Settings {
         public double phantomReplacementChance=50, maxHealth=40, flightSpeed=0.6;
         public boolean lightningVariantTargetsVillagers=true;
-        public boolean normalBurnsInDaylight=true, chargedBurnsInDaylight=true;
+        public boolean normalBurnsInDaylight=false, chargedBurnsInDaylight=false;
         public boolean normalExplosionBreakBlocks=true, chargedExplosionBreakBlocks=true;
         public double normalExplosionRadius=3, chargedExplosionRadius=6;
         // Raw maximum at zero distance, before armor/difficulty/exposure. Vanilla radius 3/6 => 43/85.

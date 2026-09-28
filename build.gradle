@@ -43,6 +43,7 @@ neoForge {
 if (gradle.startParameter.taskNames.any { it.toLowerCase(java.util.Locale.ROOT).contains('gametest') }) {
     sourceSets.main.java.srcDir 'src/gametest/java'
     sourceSets.main.resources.srcDir 'src/gametest/resources'
+    sourceSets.main.resources.srcDir 'config-examples'
 }
 
 processResources {
@@ -57,3 +58,12 @@ tasks.configureEach {
     }
 }
 
+dependencies {
+
+
+// MODMIND DEPENDENCIES START
+    implementation files('libs/modmind/IMBlocker-5.6.1-neoforge+1.20.6-1.21.8.jar')
+    implementation files('libs/modmind/jei-1.21.1-neoforge-19.57.0.449.jar')
+    implementation files('libs/modmind/mezz_config-1.21.1-neoforge-0.6.5.jar')
+// MODMIND DEPENDENCIES END
+}

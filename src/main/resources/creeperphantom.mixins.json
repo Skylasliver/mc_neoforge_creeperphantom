@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.skylasliver.creeperphantom.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "SmithingMenuMixin",
+    "ThunderFlightMixin",
+    "ThunderLightningMixin",
+    "ThunderMovementCheckMixin"
+  ],
+  "client": [
+    "ElytraLayerMixin",
+    "CapeLayerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "skylasliver_creeperphantom:item/thunder_elytra"
+  }
+}

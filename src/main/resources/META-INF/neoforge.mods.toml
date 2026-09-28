@@ -5,6 +5,9 @@ loaderVersion="[4,)"
 # 模组许可证标识。 / Mod license identifier.
 license="MIT"
 
+[[mixins]]
+config="creeperphantom.mixins.json"
+
 # 模组元数据表。 / Mod metadata table.
 [[mods]]
 # 模组或依赖的唯一标识符，取决于所在表。 / Unique identifier of the mod or dependency, depending on the table.
